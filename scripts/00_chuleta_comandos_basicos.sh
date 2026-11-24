@@ -29,3 +29,6 @@ head -n 8 archivo.fastq   # Ver solo las primeras 8 líneas (2 secuencias FASTQ)
 tail -n 8 archivo.fastq   # Ver solo las últimas 8 líneas
 less archivo.txt          # Leer un archivo página a página (salir pulsando 'q')
 clear                     # Limpiar el texto de la pantalla (también Ctrl + L)
+
+# --- 5. INTERFAZ VISUAL CON WINDOWS ---
+explorer.exe .   # Abre el Explorador de Archivos de Windows exactamente en la carpeta de Ubuntu donde estés
