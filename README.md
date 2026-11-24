@@ -1,77 +1,23 @@
-cat << 'EOF' > ~/tfm_edna/scripts/01_instalacion_y_entorno.sh
-#!/bin/bash
-# ==============================================================================
-# TFM eDNA (12S) - ETAPA 1: Instalación y configuración del entorno
-# Nota: Este archivo sirve como registro documentado de los pasos ejecutados.
-# NO ejecutar entero de nuevo, ya que el entorno ya está instalado.
-# ==============================================================================
+# TFM: Análisis bioinformático de ADN ambiental (eDNA) – Marcador 12S
 
-# --- BLOQUE A: Configuración de Windows y Ubuntu (WSL2) ---
+Este repositorio contiene los scripts y la documentación del flujo de trabajo (*pipeline*) bioinformático para el análisis de metabarcoding de ADN ambiental (eDNA) enfocado a la identificación de comunidades de peces mediante el marcador mitocondrial **12S rRNA**.
 
-# 1. Instalar Ubuntu desde PowerShell (en Windows como Administrador)
-wsl --install
+## Estructura del repositorio
 
-# 2. Abrir Ubuntu desde PowerShell
-wsl.exe -d Ubuntu
+* `scripts/`: Scripts documentados paso a paso de cada etapa del análisis.
+* `data/`: Carpeta local para los datos crudos (`.fastq.gz`) y archivos intermedios *(excluida del control de versiones mediante `.gitignore`)*.
 
-# 3. Actualizar los paquetes base del sistema Ubuntu
-sudo apt update && sudo apt upgrade -y
+## Etapas del proyecto
 
-
-# --- BLOQUE B: Instalación de Miniforge y herramientas bioinformáticas ---
-
-# 4. Descargar el instalador de Miniforge (gestor de entornos Conda)
-wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
-
-# 5. Ejecutar el instalador en modo automático (-b) dentro de ~/miniforge3 (-p)
-# (Esto evita errores de ruta al responder manualmente a la licencia)
-bash miniforge.sh -b -p ~/miniforge3
-rm miniforge.sh
-
-# 6. Inicializar Conda en Bash y recargar la configuración de la terminal
-~/miniforge3/bin/conda init bash
-source ~/.bashrc
-
-# 7. Crear el entorno virtual 'edna_env' con los canales bioconda y conda-forge
-# Incluye: cutadapt (recorte primers), vsearch/swarm (clustering), seqkit (stats) y R
-conda create -n edna_env -c bioconda -c conda-forge cutadapt vsearch swarm seqkit r-base -y
-
-# 8. Activar el entorno virtual para empezar a trabajar
-conda activate edna_env
-
-# 9. Comprobar que las herramientas responden correctamente con su versión
-cutadapt --version
-vsearch --version
-seqkit version
-
-
-# --- BLOQUE C: Estructura del proyecto y conexión con GitHub ---
-
-# 10. Clonar el repositorio remoto de GitHub en la carpeta local ~/tfm_edna
-git clone https://github.com/noevergara14/eDNA_first_steps.git ~/tfm_edna
-
-# 11. Crear las subcarpetas estándar para datos crudos y scripts
-mkdir -p ~/tfm_edna/scripts ~/tfm_edna/data
-
-# 12. Verificar la conexión remota con GitHub
-cd ~/tfm_edna
-git remote -v
-
-
-# --- BLOQUE D: Script de arranque diario (~/iniciar_tfm.sh) ---
-
-# 13. Crear un atajo en la carpeta personal para entrar al proyecto y activar el entorno
-cat << 'INNER_EOF' > ~/iniciar_tfm.sh
-#!/bin/bash
-cd ~/tfm_edna
-conda activate edna_env
-cutadapt --version
-vsearch --version
-seqkit version
-pwd
-ls -la
-INNER_EOF
-
-# 14. Comando único a ejecutar cada vez que se abre Ubuntu desde cero:
-source ~/iniciar_tfm.sh
-EOF
+1. **Preparación del entorno (`scripts/01_instalacion_y_entorno.sh`)** ✅
+   * Configuración de Ubuntu en WSL2 y gestor de paquetes Miniforge/Conda.
+   * Creación del entorno `edna_env` con `cutadapt`, `vsearch`, `swarm`, `seqkit` y `R`.
+2. **Exploración inicial y control de calidad de los datos** 🔄 *(En curso)*
+   * Inspección de la estructura de los *reads* FASTQ (primers, barcode, adaptadores).
+   * Revisión de informes de calidad (`MultiQC`) y estadísticas de secuenciación (`seqkit stats`).
+3. **Recorte de primers y filtrado de calidad** ⏳
+   * Eliminación de primers y adaptadores con `cutadapt`.
+4. **Fusión de pares (*merging*), dereplicación y *clustering*** ⏳
+   * Ensamblaje de lecturas R1/R2 y agrupación de MOTUs/ASVs con `vsearch` y `swarm`.
+5. **Asignación taxonómica y análisis ecológico en R** ⏳
+   * Clasificación frente a bases de datos de referencia 12S, filtrado de controles negativos (blancos) y análisis de biodiversidad.
